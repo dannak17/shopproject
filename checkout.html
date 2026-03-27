@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pago - Velas Artesanales</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#f7d9c4">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+  <header class="header">
+    <div class="container">
+      <h1>Velas Artesanales</h1>
+      <a href="index.html" class="back-link">Volver a la tienda</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <h2>Finalizar compra</h2>
+    <div class="checkout-container">
+      <div class="order-summary">
+        <h3>Resumen del pedido</h3>
+        <div id="order-items"></div>
+        <div class="order-total">
+          <strong>Total: $<span id="order-total">0</span></strong>
+        </div>
+      </div>
+
+      <div class="payment-form-container">
+        <h3>Datos de pago</h3>
+        <form id="payment-form">
+          <div id="payment-element" class="payment-element">
+            <!-- Stripe Elements se monta aquí -->
+          </div>
+          <button id="payment-submit" class="btn-primary" type="submit">
+            <span id="payment-button-text">Pagar</span>
+            <span id="payment-spinner" class="spinner hidden">⏳</span>
+          </button>
+          <div id="payment-error" class="payment-error hidden"></div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

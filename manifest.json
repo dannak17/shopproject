@@ -1,0 +1,9 @@
+{
+  "name": "Velas Artesanales",
+  "short_name": "Velas",
+  "description": "Tienda de velas artesanales con pago en línea",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "theme_color": "#f7d9c4",
+  "background_color": "#fef9f5"
+}
