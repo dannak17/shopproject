@@ -2,38 +2,39 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Velas Artesanales</title>
-  <link rel="stylesheet" href="css/styles.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>CodeCraft</title>
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#f7d9c4">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta name="theme-color" content="#1e1e2f">
+  <link rel="stylesheet" href="./css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="https://js.stripe.com/v3/"></script>
 </head>
 <body>
-  <header class="header">
-    <div class="container">
-      <h1>Velas Artesanales</h1>
-      <div class="cart-icon">
-        <i class="fas fa-shopping-cart"></i>
-        <span id="cart-count">0</span>
-      </div>
+  <header>
+    <div class="logo">
+      <i class="fas fa-code"></i>
+      <h1>CodeCraft Merch</h1>
+    </div>
+    <div class="cart-icon" id="cart-icon">
+      <i class="fas fa-shopping-cart"></i>
+      <span id="cart-count">0</span>
     </div>
   </header>
 
-  <main class="container">
-    <h2>Nuestras Velas</h2>
-    <div class="products-grid" id="products-grid">
+  <main>
+    <div class="hero">
+      <h2>Desarrolla tu estilo</h2>
+      <p>Ropa y accesorios para verdaderos programadores </p>
     </div>
+    <div class="products" id="products-container"></div>
   </main>
 
   <div id="cart-modal" class="modal">
     <div class="modal-content">
-      <div class="modal-header">
-        <h3>Tu Carrito</h3>
-        <span class="close-modal">&times;</span>
-      </div>
-      <div id="cart-items" class="cart-items"></div>
+      <span class="close">&times;</span>
+      <h2><i class="fas fa-shopping-bag"></i> Tu carrito</h2>
+      <div id="cart-items"></div>
       <div class="cart-total">
         <strong>Total: $<span id="cart-total">0</span></strong>
       </div>
@@ -41,7 +42,21 @@
     </div>
   </div>
 
+  <div id="checkout-modal" class="modal">
+    <div class="modal-content checkout-modal">
+      <span class="close" id="close-checkout">&times;</span>
+      <h2>Pagar con tarjeta</h2>
+      <form id="payment-form">
+        <div id="payment-element"></div>
+        <button id="submit-payment" class="btn-primary">
+          <span id="button-text">Pagar</span>
+          <span id="spinner" class="spinner hidden">⏳</span>
+        </button>
+        <div id="payment-message" class="hidden"></div>
+      </form>
+    </div>
+  </div>
+
   <script src="js/app.js"></script>
-  <script src="https://js.stripe.com/v3/"></script>
 </body>
 </html>

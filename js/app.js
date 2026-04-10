@@ -1,180 +1,173 @@
 const products = [
-  { id: 1, name: 'Vela de Lavanda', price: 15, image: 'https://picsum.photos/id/200/300/200' },
-  { id: 2, name: 'Vela de Vainilla', price: 18, image: 'https://picsum.photos/id/210/300/200' },
-  { id: 3, name: 'Vela de Sándalo', price: 22, image: 'https://picsum.photos/id/220/300/200' }
+  { id: 1, name: "Camiseta", price: 0.10, image: "https://srv.latostadora.com/image/hombre-desarrollador-camisa-friki-del-ano--id:a9fc8e20-5bf3-4e32-b538-eb29f4aa2c69;s:H_A1;b:f2f2f2;w:420;tpl:H_A1F;f:f.jpg" },
+  { id: 2, name: "Sudadera con capucha", price: 0.20, image: "https://i.etsystatic.com/8039902/r/il/084fca/2053802624/il_fullxfull.2053802624_9z3a.jpg" },
+  { id: 3, name: "Taza de cerámica", price: 0.30, image: "https://i.etsystatic.com/21468781/r/il/426363/2712010149/il_300x300.2712010149_1y8y.jpg" },
+  { id: 4, name: "Conjunto de broches", price: 0.40, image: "https://m.media-amazon.com/images/I/610ke3CQ7nL.jpg" },
+  { id: 5, name: "Gorra", price: 0.50, image: "https://i.etsystatic.com/19775863/r/il/a1a5c7/7416296357/il_600x600.7416296357_fa8b.jpg" },
+  { id: 6, name: "Mochila resistente", price: 0.60, image: "https://www.officedepot.com.mx/medias/100140887.jpg-1200ftw?context=bWFzdGVyfHJvb3R8MTgzMDcyfGltYWdlL2pwZWd8YURsa0wyZzBOQzh4TWpFd05EY3pOems0TURRME5pOHhNREF4TkRBNE9EY3VhbkJuWHpFeU1EQm1kSGN8NTRiMDY2YzdlZmE3NjAzNjUxODAyZjM5MzE5NTViZWI4MWRhYWRlYWIyYjEyYjA2NTU5N2ZjMTkzMmU0ODBlYw" }
 ];
 
-let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+let cart = [];
 
-function saveCart() {
-  localStorage.setItem('cart', JSON.stringify(cart));
-  updateCartUI();
-}
+const productsContainer = document.getElementById('products-container');
+const cartIcon = document.getElementById('cart-icon');
+const cartModal = document.getElementById('cart-modal');
+const checkoutModal = document.getElementById('checkout-modal');
+const cartItemsDiv = document.getElementById('cart-items');
+const cartTotalSpan = document.getElementById('cart-total');
+const cartCountSpan = document.getElementById('cart-count');
+const checkoutBtn = document.getElementById('checkout-btn');
 
-function updateCartUI() {
-  const cartCount = document.getElementById('cart-count');
-  if (cartCount) cartCount.innerText = cart.reduce((sum, item) => sum + item.quantity, 0);
-}
+let stripe, elements, paymentElement;
 
 function renderProducts() {
-  const grid = document.getElementById('products-grid');
-  if (!grid) return;
-  grid.innerHTML = products.map(product => `
+  productsContainer.innerHTML = products.map(p => `
     <div class="product-card">
-      <img src="${product.image}" alt="${product.name}" class="product-image">
-      <div class="product-info">
-        <h3 class="product-title">${product.name}</h3>
-        <p class="product-price">$${product.price}</p>
-        <button class="add-to-cart" data-id="${product.id}">Añadir al carrito</button>
-      </div>
+      <img src="${p.image}" alt="${p.name}">
+      <h3>${p.name}</h3>
+      <p>$${p.price.toFixed(2)}</p>
+      <button onclick="addToCart(${p.id})">Añadir al carrito</button>
     </div>
   `).join('');
-
-  document.querySelectorAll('.add-to-cart').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const id = parseInt(e.target.dataset.id);
-      addToCart(id);
-    });
-  });
 }
 
 function addToCart(productId) {
   const product = products.find(p => p.id === productId);
-  const existingItem = cart.find(item => item.id === productId);
-  if (existingItem) {
-    existingItem.quantity++;
+  const existing = cart.find(item => item.id === productId);
+  if (existing) {
+    existing.quantity += 1;
   } else {
     cart.push({ ...product, quantity: 1 });
   }
-  saveCart();
-  showCartModal();
-}
-
-function showCartModal() {
-  const modal = document.getElementById('cart-modal');
-  if (!modal) return;
-  const cartItemsDiv = document.getElementById('cart-items');
-  const cartTotalSpan = document.getElementById('cart-total');
-
-  if (cart.length === 0) {
-    cartItemsDiv.innerHTML = '<p>Tu carrito está vacío</p>';
-    cartTotalSpan.innerText = '0';
-  } else {
-    cartItemsDiv.innerHTML = cart.map(item => `
-      <div class="cart-item">
-        <span>${item.name} x${item.quantity}</span>
-        <span>$${item.price * item.quantity}</span>
-      </div>
-    `).join('');
-    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    cartTotalSpan.innerText = total;
-  }
-  modal.style.display = 'flex';
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  renderProducts();
   updateCartUI();
+}
 
-  const cartIcon = document.querySelector('.cart-icon');
-  if (cartIcon) cartIcon.addEventListener('click', showCartModal);
-
-  const closeModal = document.querySelector('.close-modal');
-  if (closeModal) closeModal.addEventListener('click', () => {
-    document.getElementById('cart-modal').style.display = 'none';
-  });
-
-  const checkoutBtn = document.getElementById('checkout-btn');
-  if (checkoutBtn) {
-    checkoutBtn.addEventListener('click', () => {
-      if (cart.length === 0) {
-        alert('Tu carrito está vacío');
-        return;
-      }
-      localStorage.setItem('checkout_cart', JSON.stringify(cart));
-      window.location.href = 'checkout.html';
-    });
+function updateCartUI() {
+  const totalItems = cart.reduce((sum, i) => sum + i.quantity, 0);
+  cartCountSpan.textContent = totalItems;
+  if (cart.length === 0) {
+    cartItemsDiv.innerHTML = '<p>El carrito está vacío</p>';
+    cartTotalSpan.textContent = '0';
+    return;
   }
+  cartItemsDiv.innerHTML = cart.map(item => `
+    <div class="cart-item">
+      <div class="cart-item-info">
+        <img src="${item.image}" alt="${item.name}">
+        <div>
+          <strong>${item.name}</strong><br>
+          <small>$${item.price.toFixed(2)} c/u</small>
+        </div>
+      </div>
+      <div class="cart-item-controls">
+        <button onclick="updateQuantity(${item.id}, ${item.quantity - 1})">-</button>
+        <span>${item.quantity}</span>
+        <button onclick="updateQuantity(${item.id}, ${item.quantity + 1})">+</button>
+        <button onclick="removeItem(${item.id})" class="remove-btn">🗑️</button>
+      </div>
+      <div style="font-weight: bold;">$${(item.price * item.quantity).toFixed(2)}</div>
+    </div>
+  `).join('');
+  const total = cart.reduce((sum, i) => sum + (i.price * i.quantity), 0);
+  cartTotalSpan.textContent = total.toFixed(2);
+}
+
+function updateQuantity(productId, newQuantity) {
+  if (newQuantity <= 0) {
+    removeItem(productId);
+    return;
+  }
+  const item = cart.find(i => i.id === productId);
+  if (item) item.quantity = newQuantity;
+  updateCartUI();
+}
+
+function removeItem(productId) {
+  cart = cart.filter(i => i.id !== productId);
+  updateCartUI();
+}
+
+function openModal(modal) { modal.style.display = 'flex'; }
+function closeModal(modal) { modal.style.display = 'none'; }
+
+cartIcon.onclick = () => openModal(cartModal);
+document.querySelectorAll('.close').forEach(btn => {
+  btn.onclick = () => {
+    closeModal(cartModal);
+    closeModal(checkoutModal);
+  };
 });
 
-if (window.location.pathname.includes('checkout.html')) {
-  let stripe = null;
-  let elements = null;
-
-  async function initStripe() {
-    if (stripe) return;
-    stripe = Stripe('pk_test_tu_publishable_key'); // Reemplazar con tu clave publicable
+checkoutBtn.onclick = async () => {
+  if (cart.length === 0) {
+    alert('El carrito está vacío');
+    return;
   }
+  closeModal(cartModal);
+  await initializeStripeCheckout();
+  openModal(checkoutModal);
+};
 
-  async function loadCheckout() {
-    const checkoutCart = JSON.parse(localStorage.getItem('checkout_cart') || '[]');
-    const orderItemsDiv = document.getElementById('order-items');
-    const orderTotalSpan = document.getElementById('order-total');
+async function initializeStripeCheckout() {
+  const total = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
+  const amountCents = Math.round(total * 100);
+  try {
+    const response = await fetch('https://tu-backend.onrender.com/create-payment-intent', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ amount: amountCents })
+    });
+    const { clientSecret } = await response.json();
 
-    if (!orderItemsDiv) return;
+    stripe = Stripe('pk_test_TU_PUBLISHABLE_KEY');
+    elements = stripe.elements({ clientSecret });
+    paymentElement = elements.create('payment');
+    paymentElement.mount('#payment-element');
 
-    if (checkoutCart.length === 0) {
-      orderItemsDiv.innerHTML = '<p>No hay productos en tu pedido. <a href="index.html">Volver a la tienda</a></p>';
-      document.getElementById('payment-form').style.display = 'none';
-      return;
-    }
+    const form = document.getElementById('payment-form');
+    const submitBtn = document.getElementById('submit-payment');
+    const btnText = document.getElementById('button-text');
+    const spinner = document.getElementById('spinner');
+    const msgDiv = document.getElementById('payment-message');
 
-    let total = 0;
-    orderItemsDiv.innerHTML = checkoutCart.map(item => {
-      total += item.price * item.quantity;
-      return `<div class="cart-item">${item.name} x${item.quantity} - $${item.price * item.quantity}</div>`;
-    }).join('');
-    orderTotalSpan.innerText = total;
-    try {
-      await initStripe();
-      const response = await fetch('http://localhost:4242/create-payment-intent', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: total * 100 }) //esta en centavos el pago
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      submitBtn.disabled = true;
+      btnText.textContent = 'Procesando...';
+      spinner.classList.remove('hidden');
+
+      const { error } = await stripe.confirmPayment({
+        elements,
+        confirmParams: { return_url: window.location.origin },
+        redirect: 'if_required'
       });
-      if (!response.ok) throw new Error('Error al crear el pago');
-      const { clientSecret } = await response.json();
 
-      elements = stripe.elements({ clientSecret });
-      const paymentElement = elements.create('payment');
-      paymentElement.mount('#payment-element');
-
-      const form = document.getElementById('payment-form');
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const submitBtn = document.getElementById('payment-submit');
-        const buttonText = document.getElementById('payment-button-text');
-        const spinner = document.getElementById('payment-spinner');
-        const errorDiv = document.getElementById('payment-error');
-
-        submitBtn.disabled = true;
-        buttonText.textContent = 'Procesando...';
-        spinner.classList.remove('hidden');
-
-        const { error } = await stripe.confirmPayment({
-          elements,
-          confirmParams: { return_url: window.location.origin + '/success.html' },
-          redirect: 'if_required'
-        });
-
-        if (error) {
-          errorDiv.textContent = error.message;
-          errorDiv.classList.remove('hidden');
-          submitBtn.disabled = false;
-          buttonText.textContent = 'Pagar';
-          spinner.classList.add('hidden');
-        } else {
-         
-          localStorage.removeItem('checkout_cart');
-          localStorage.removeItem('cart');
-          window.location.href = 'success.html';
-        }
-      });
-    } catch (error) {
-      console.error(error);
-      alert('Error al conectar con el servidor de pagos. Asegúrate de que el backend esté corriendo.');
-    }
+      if (error) {
+        msgDiv.textContent = error.message;
+        msgDiv.className = 'error';
+        msgDiv.classList.remove('hidden');
+        submitBtn.disabled = false;
+        btnText.textContent = 'Pagar';
+        spinner.classList.add('hidden');
+      } else {
+        msgDiv.textContent = '¡Pago exitoso! Gracias por tu compra.';
+        msgDiv.className = 'success';
+        msgDiv.classList.remove('hidden');
+        cart = [];
+        updateCartUI();
+        setTimeout(() => {
+          closeModal(checkoutModal);
+          paymentElement.unmount();
+          form.reset();
+          msgDiv.classList.add('hidden');
+        }, 2000);
+      }
+    };
+  } catch (err) {
+    console.error(err);
+    alert('Error al iniciar el pago. Verifica que el backend esté funcionando.');
   }
-
-  loadCheckout();
 }
+
+renderProducts();
+updateCartUI();

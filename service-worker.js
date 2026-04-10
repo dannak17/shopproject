@@ -1,30 +1,26 @@
-const CACHE = "velas-v1";
-const FILES = [
-  "/",
-  "/index.html",
-  "/checkout.html",
-  "/success.html",
-  "/css/styles.css",
-  "/js/app.js",
-  "/manifest.json",
-  "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
-  "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+const CACHE_NAME = 'codecraft-merch-v1';
+const urlsToCache = [
+  '/',
+  '/index.html',
+  '/css/style.css',
+  '/js/app.js',
+  '/manifest.json',
+  'https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap',
+  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css'
 ];
 
-self.addEventListener("install", e => {
-  e.waitUntil(
-    caches.open(CACHE).then(cache => cache.addAll(FILES))
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
   );
 });
 
-self.addEventListener("fetch", e => {
-  // No cachear peticiones a Stripe ni al backend
-  if (e.request.url.includes('stripe.com') || e.request.url.includes('localhost:4242')) {
-    return fetch(e.request);
+self.addEventListener('fetch', event => {
+  if (event.request.url.includes('stripe.com') ||
+      event.request.url.includes('https://shopproject-zpv1.onrender.com')) {
+    return fetch(event.request);
   }
-  e.respondWith(
-    caches.match(e.request).then(response => {
-      return response || fetch(e.request);
-    })
+  event.respondWith(
+    caches.match(event.request).then(response => response || fetch(event.request))
   );
 });
