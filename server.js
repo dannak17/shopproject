@@ -9,14 +9,14 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const stripe = new Stripe(process.env.sk_test_51T4M38KcN6CsQSzRBrLuZu8tf7EjGhhNmfVK1NTZovWT6vL6ai83SeoEKmpfNYWwdRCnFoa31pGZUghsVjIV04o400VWMrl69c);
+const stripe = new Stripe(process.env.sk_test_51T4M38KcN6CsQSzRaZ96q2xKf0VhHllrsQ6S8qi3dPVs58N7c0HSpMcnnSw3NULqCEzMDKLX2XDLnyfA0w4i8XeU00zBgh9zSt);
 
 app.post('/create-payment-intent', async (req, res) => {
   try {
     const { amount } = req.body;
     const paymentIntent = await stripe.paymentIntents.create({
       amount,
-      currency: 'usd',
+      currency: 'mxn',
       automatic_payment_methods: { enabled: true }
     });
     res.json({ clientSecret: paymentIntent.client_secret });
