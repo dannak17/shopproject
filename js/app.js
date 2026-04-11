@@ -1,10 +1,10 @@
 const products = [
-  { id: 1, name: "Camiseta", price: 0.10, image: "https://srv.latostadora.com/image/hombre-desarrollador-camisa-friki-del-ano--id:a9fc8e20-5bf3-4e32-b538-eb29f4aa2c69;s:H_A1;b:f2f2f2;w:420;tpl:H_A1F;f:f.jpg" },
-  { id: 2, name: "Sudadera con capucha", price: 0.20, image: "https://i.etsystatic.com/8039902/r/il/084fca/2053802624/il_fullxfull.2053802624_9z3a.jpg" },
-  { id: 3, name: "Taza de cerámica", price: 0.30, image: "https://i.etsystatic.com/21468781/r/il/426363/2712010149/il_300x300.2712010149_1y8y.jpg" },
-  { id: 4, name: "Conjunto de broches", price: 0.40, image: "https://m.media-amazon.com/images/I/610ke3CQ7nL.jpg" },
+  { id: 1, name: "Camiseta", price: 11.00, image: "https://srv.latostadora.com/image/hombre-desarrollador-camisa-friki-del-ano--id:a9fc8e20-5bf3-4e32-b538-eb29f4aa2c69;s:H_A1;b:f2f2f2;w:420;tpl:H_A1F;f:f.jpg" },
+  { id: 2, name: "Sudadera con capucha", price: 10.00, image: "https://i.etsystatic.com/8039902/r/il/084fca/2053802624/il_fullxfull.2053802624_9z3a.jpg" },
+  { id: 3, name: "Taza de cerámica", price: 11.00, image: "https://i.etsystatic.com/21468781/r/il/426363/2712010149/il_300x300.2712010149_1y8y.jpg" },
+  { id: 4, name: "Conjunto de broches", price: 10.00, image: "https://m.media-amazon.com/images/I/610ke3CQ7nL.jpg" },
   { id: 5, name: "Gorra", price: 0.50, image: "https://i.etsystatic.com/19775863/r/il/a1a5c7/7416296357/il_600x600.7416296357_fa8b.jpg" },
-  { id: 6, name: "Mochila resistente", price: 0.60, image: "https://www.officedepot.com.mx/medias/100140887.jpg-1200ftw?context=bWFzdGVyfHJvb3R8MTgzMDcyfGltYWdlL2pwZWd8YURsa0wyZzBOQzh4TWpFd05EY3pOems0TURRME5pOHhNREF4TkRBNE9EY3VhbkJuWHpFeU1EQm1kSGN8NTRiMDY2YzdlZmE3NjAzNjUxODAyZjM5MzE5NTViZWI4MWRhYWRlYWIyYjEyYjA2NTU5N2ZjMTkzMmU0ODBlYw" }
+  { id: 6, name: "Mochila resistente", price: 20.00, image: "https://www.officedepot.com.mx/medias/100140887.jpg-1200ftw?context=bWFzdGVyfHJvb3R8MTgzMDcyfGltYWdlL2pwZWd8YURsa0wyZzBOQzh4TWpFd05EY3pOems0TURRME5pOHhNREF4TkRBNE9EY3VhbkJuWHpFeU1EQm1kSGN8NTRiMDY2YzdlZmE3NjAzNjUxODAyZjM5MzE5NTViZWI4MWRhYWRlYWIyYjEyYjA2NTU5N2ZjMTkzMmU0ODBlYw" }
 ];
 
 let cart = [];
@@ -104,22 +104,23 @@ checkoutBtn.onclick = async () => {
     return;
   }
   closeModal(cartModal);
-  await initializeStripeCheckout();
   openModal(checkoutModal);
+  await initializeStripeCheckout();
 };
 
 async function initializeStripeCheckout() {
   const total = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
   const amountCents = Math.round(total * 100);
   try {
-    const response = await fetch('https://tu-backend.onrender.com/create-payment-intent', {
+    const response = await fetch('https://shopproject-zpv1.onrender.com/create-payment-intent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ amount: amountCents })
     });
+    if (!response.ok) throw new Error('Error en el servidor');
     const { clientSecret } = await response.json();
 
-    stripe = Stripe('pk_test_TU_PUBLISHABLE_KEY');
+    stripe = Stripe('pk_test_51T4M38KcN6CsQSzR3zpi4DCrS4oouQ6hiiJFdwFwpYvVQO2hWvyTvkUYMWJljXP7zW1YMqS80ovAMlGayUgRBYL600bQsdVhY2');
     elements = stripe.elements({ clientSecret });
     paymentElement = elements.create('payment');
     paymentElement.mount('#payment-element');
@@ -157,7 +158,7 @@ async function initializeStripeCheckout() {
         updateCartUI();
         setTimeout(() => {
           closeModal(checkoutModal);
-          paymentElement.unmount();
+          if (paymentElement) paymentElement.unmount();
           form.reset();
           msgDiv.classList.add('hidden');
         }, 2000);
@@ -166,6 +167,7 @@ async function initializeStripeCheckout() {
   } catch (err) {
     console.error(err);
     alert('Error al iniciar el pago. Verifica que el backend esté funcionando.');
+    closeModal(checkoutModal);
   }
 }
 
