@@ -120,7 +120,7 @@ async function initializeStripeCheckout() {
     if (!response.ok) throw new Error('Error en el servidor');
     const { clientSecret } = await response.json();
 
-    stripe = Stripe('pk_test_51T4M38KcN6CsQSzR3zpi4DCrS4oouQ6hiiJFdwFwpYvVQO2hWvyTvkUYMWJljXP7zW1YMqS80ovAMlGayUgRBYL600bQsdVhY2');
+    stripe = Stripe('pk_live_51T4M2a38eBTm0LV2RgqqRbY60TAcYezPWJaw0huZuImlBjZrsoHvI6jEcNeKhWxtJTsl1tT9vAGB1VnI64ZciRDh00AoNM66Gn');
     elements = stripe.elements({ clientSecret });
     paymentElement = elements.create('payment');
     paymentElement.mount('#payment-element');
